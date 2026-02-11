@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import '../services/ftp_service.dart';
-=======
->>>>>>> b817fe672505a838340bd073d91af64928818446
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,7 +9,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-<<<<<<< HEAD
   final FtpService _ftpService = FtpService();
 
   bool _isServerRunning = false;
@@ -20,18 +16,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String _ipAddress = 'Loading...';
   String _networkName = 'Loading...';
   String _serverUrl = '';
-=======
-  bool _isServerRunning = false;
-  final String _wifiStatus = 'Connected';
-  final String _ipAddress = '192.168.1.100';
-  final String _networkName = 'MyHomeWiFi';
-  final String _serverUrl = 'ftp://192.168.1.100:2121';
->>>>>>> b817fe672505a838340bd073d91af64928818446
   final String _userId = 'admin';
   final String _password = 'admin123';
   bool _anonymousAccess = false;
   final String _rootFolder = '/storage/emulated/0/';
-<<<<<<< HEAD
   bool _hasLocationPermission = false;
 
   @override
@@ -116,10 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-=======
-
-  void _toggleServer() {
->>>>>>> b817fe672505a838340bd073d91af64928818446
     setState(() {
       _isServerRunning = !_isServerRunning;
     });
@@ -129,7 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-<<<<<<< HEAD
         title: const Text('EarlFtp: WiFi FTP Server'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
@@ -140,18 +123,12 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Refresh WiFi Info',
           ),
         ],
-=======
-        title: const Text('FTP Server'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
->>>>>>> b817fe672505a838340bd073d91af64928818446
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-<<<<<<< HEAD
             // Permission Warning Banner (shown when permission denied)
             if (_wifiStatus == 'Permission Denied')
               Card(
@@ -160,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
                     children: [
-                      const Icon(Icons.warning, color: Colors.orange),
+                      const Icon(Icons.warning, color: Colors.orange, size: 20),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -177,13 +154,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 4),
                             const Text(
                               'Grant permission to view WiFi details',
-                              style: TextStyle(fontSize: 12),
+                              style: TextStyle(fontSize: 11),
                             ),
                           ],
                         ),
                       ),
                       TextButton(
                         onPressed: _checkPermissionAndLoad,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
                         child: const Text('Grant'),
                       ),
                     ],
@@ -193,8 +173,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
             if (_wifiStatus == 'Permission Denied') const SizedBox(height: 16),
 
-=======
->>>>>>> b817fe672505a838340bd073d91af64928818446
             // Network Status Card
             Card(
               elevation: 4,
@@ -215,11 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icons.wifi,
                       'WiFi Status',
                       _wifiStatus,
-<<<<<<< HEAD
                       _wifiStatus == 'Connected' ? Colors.green : Colors.grey,
-=======
-                      Colors.green,
->>>>>>> b817fe672505a838340bd073d91af64928818446
                     ),
                     const SizedBox(height: 12),
                     _buildInfoRow(
@@ -357,11 +331,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildInfoRow(
-    IconData icon,
-    String label,
-    String value,
-    Color iconColor,
-  ) {
+      IconData icon,
+      String label,
+      String value,
+      Color iconColor,
+      ) {
     return Row(
       children: [
         Icon(icon, color: iconColor, size: 24),

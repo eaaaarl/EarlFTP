@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 name: EarlFTP
 description: "EarlFTP WiFi FTP Server"
-=======
-name: earlftp
-description: "A new Flutter project."
->>>>>>> b817fe672505a838340bd073d91af64928818446
+
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -39,10 +35,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-<<<<<<< HEAD
   permission_handler: ^12.0.1
-=======
->>>>>>> b817fe672505a838340bd073d91af64928818446
+
 
 dev_dependencies:
   flutter_test:
