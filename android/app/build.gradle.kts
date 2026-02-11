@@ -6,11 +6,8 @@ plugins {
 }
 
 android {
-<<<<<<< HEAD
     namespace = "com.eaaaarl.earlftp"
-=======
-    namespace = "com.eaaaarl.earlftp.earlftp"
->>>>>>> b817fe672505a838340bd073d91af64928818446
+
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -25,11 +22,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-<<<<<<< HEAD
         applicationId = "com.eaaaarl.earlftp"
-=======
-        applicationId = "com.eaaaarl.earlftp.earlftp"
->>>>>>> b817fe672505a838340bd073d91af64928818446
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -45,8 +38,29 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/license.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt",
+                "META-INF/notice.txt",
+                "META-INF/ASL2.0",
+                "META-INF/*.kotlin_module"
+            )
+        }
+    }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation("org.apache.ftpserver:ftpserver-core:1.2.0")
+    implementation("org.slf4j:slf4j-android:1.7.36")
 }

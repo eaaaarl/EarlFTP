@@ -75,14 +75,11 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-<<<<<<< HEAD
   flutter_web_plugins:
     dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
-=======
->>>>>>> b817fe672505a838340bd073d91af64928818446
   leak_tracker:
     dependency: transitive
     description:
@@ -147,7 +144,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.1"
-<<<<<<< HEAD
   permission_handler:
     dependency: "direct main"
     description:
@@ -204,8 +200,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
-=======
->>>>>>> b817fe672505a838340bd073d91af64928818446
   sky_engine:
     dependency: transitive
     description: flutter
@@ -275,7 +269,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "15.0.2"
-<<<<<<< HEAD
   web:
     dependency: transitive
     description:
@@ -287,8 +280,3 @@ packages:
 sdks:
   dart: ">=3.10.8 <4.0.0"
   flutter: ">=3.24.0"
-=======
-sdks:
-  dart: ">=3.10.8 <4.0.0"
-  flutter: ">=3.18.0-18.0.pre.54"
->>>>>>> b817fe672505a838340bd073d91af64928818446

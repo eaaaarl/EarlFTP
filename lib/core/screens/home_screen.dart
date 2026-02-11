@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/ftp_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,11 +17,13 @@ class _HomeScreenState extends State<HomeScreen> {
   String _ipAddress = 'Loading...';
   String _networkName = 'Loading...';
   String _serverUrl = '';
+  int _serverPort = 0;
   final String _userId = 'admin';
   final String _password = 'admin123';
   bool _anonymousAccess = false;
   final String _rootFolder = '/storage/emulated/0/';
   bool _hasLocationPermission = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -84,6 +87,46 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _showStoragePermissionDialog() async {
+    final shouldRequest = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.folder_open, color: Colors.blue),
+            SizedBox(width: 8),
+            Text(
+              'Storage Permission',
+              style: TextStyle(fontSize: 15),
+            ),
+          ],
+        ),
+        content: const Text(
+          'To access and share files via FTP, we need storage permission. '
+              'This allows you to browse and transfer files.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Grant Permission'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldRequest == true) {
+      final granted = await _ftpService.requestAllPermissions();
+      if (!granted) {
+        _showSnackBar('Storage permission denied', Colors.red);
+      }
+    }
+  }
+
   Future<void> _loadWifiInformation() async {
     final wifiInfo = await _ftpService.getWifiInformation();
     print('Wifi Information: $wifiInfo');
@@ -92,28 +135,97 @@ class _HomeScreenState extends State<HomeScreen> {
       _wifiStatus = wifiInfo['wifiStatus'] ?? 'Unknown';
       _ipAddress = wifiInfo['ipAddress'] ?? 'N/A';
       _networkName = wifiInfo['networkName'] ?? 'N/A';
-      _serverUrl = 'ftp://$_ipAddress:2121';
       _hasLocationPermission = wifiInfo['wifiStatus'] != 'Permission Denied';
     });
   }
 
-  void _toggleServer() {
+  Future<void> _toggleServer() async {
     // Check permission before starting server
     if (!_isServerRunning && _wifiStatus == 'Permission Denied') {
       _showPermissionExplanationDialog();
       return;
     }
 
+    if (!_isServerRunning) {
+      final hasStorage = await _ftpService.hasStoragePermission();
+      if (!hasStorage) {
+        await _showStoragePermissionDialog();
+        // Check again after dialog
+        final stillNoPermission = !await _ftpService.hasStoragePermission();
+        if (stillNoPermission) {
+          return; // Don't start server without storage permission
+        }
+      }
+    }
     setState(() {
-      _isServerRunning = !_isServerRunning;
+      _isLoading = true;
     });
+
+    if (_isServerRunning) {
+      // Stop server
+      final stopped = await _ftpService.stopFtpServer();
+      setState(() {
+        _isServerRunning = false;
+        _serverPort = 0;
+        _serverUrl = '';
+        _isLoading = false;
+      });
+
+      if (stopped) {
+        _showSnackBar('FTP Server stopped', Colors.orange);
+      }
+    } else {
+      // Start server
+      final result = await _ftpService.startFtpServer(
+        username: _userId,
+        password: _password,
+        rootPath: _rootFolder,
+        anonymousAccess: _anonymousAccess,
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (result['success'] == true) {
+        setState(() {
+          _isServerRunning = true;
+          _serverPort = result['port'] ?? 0;
+          _serverUrl = 'ftp://$_ipAddress:$_serverPort';
+        });
+        _showSnackBar(
+          'FTP Server started on port $_serverPort',
+          Colors.green,
+        );
+      } else {
+        _showSnackBar(
+          result['message'] ?? 'Failed to start server',
+          Colors.red,
+        );
+      }
+    }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  Future<void> _copyToClipboard(String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    _showSnackBar('Copied to clipboard', Colors.blue);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EarlFtp: WiFi FTP Server'),
+        title: const Text('EarlFTP'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
@@ -217,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // Start/Stop Server Button
             ElevatedButton(
-              onPressed: _toggleServer,
+              onPressed: _isLoading ? null : _toggleServer,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _isServerRunning ? Colors.red : Colors.green,
                 foregroundColor: Colors.white,
@@ -225,8 +337,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+                disabledBackgroundColor: Colors.grey,
               ),
-              child: Row(
+              child: _isLoading
+                  ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+                  : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(_isServerRunning ? Icons.stop : Icons.play_arrow),
@@ -281,6 +403,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 20),
                       _buildServerDetailRow('Server URL', _serverUrl, true),
                       const Divider(height: 24),
+                      _buildServerDetailRow('Port', _serverPort.toString(), true),
+                      const Divider(height: 24),
                       _buildServerDetailRow('User ID', _userId, true),
                       const Divider(height: 24),
                       _buildServerDetailRow('Password', _password, true),
@@ -297,7 +421,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           Switch(
                             value: _anonymousAccess,
-                            onChanged: (value) {
+                            onChanged: _isServerRunning
+                                ? null
+                                : (value) {
                               setState(() {
                                 _anonymousAccess = value;
                               });
@@ -312,7 +438,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton.icon(
-                          onPressed: () {
+                          onPressed: _isServerRunning
+                              ? null
+                              : () {
                             // Handle folder selection
                           },
                           icon: const Icon(Icons.folder_open),
@@ -390,9 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (showCopy)
               IconButton(
                 icon: const Icon(Icons.copy, size: 18),
-                onPressed: () {
-                  // Handle copy to clipboard
-                },
+                onPressed: () => _copyToClipboard(value),
                 color: Colors.blue,
                 tooltip: 'Copy',
               ),
