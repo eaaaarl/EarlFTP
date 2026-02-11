@@ -6,7 +6,11 @@ plugins {
 }
 
 android {
+<<<<<<< HEAD
     namespace = "com.eaaaarl.earlftp"
+=======
+    namespace = "com.eaaaarl.earlftp.earlftp"
+>>>>>>> b817fe672505a838340bd073d91af64928818446
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +25,11 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+<<<<<<< HEAD
         applicationId = "com.eaaaarl.earlftp"
+=======
+        applicationId = "com.eaaaarl.earlftp.earlftp"
+>>>>>>> b817fe672505a838340bd073d91af64928818446
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

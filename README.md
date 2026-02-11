@@ -1,6 +1,10 @@
 # earlftp
 
+<<<<<<< HEAD
 EarlFTP WiFi FTP Server
+=======
+A new Flutter project.
+>>>>>>> b817fe672505a838340bd073d91af64928818446
 
 ## Getting Started
 
