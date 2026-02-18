@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../features/home/widgets/server_actions_button.dart';
 import '../services/ftp_service.dart';
 import '../../features/home/widgets/permission_banner.dart';
 import '../../features/home/widgets/network_status_card.dart';
 import '../../features/home/widgets/server_details_card.dart';
-import '../../features/home/widgets/server_actions_button.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -224,23 +224,39 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('WiFi FTP Server'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadWifiInformation,
-            tooltip: 'Refresh WiFi Info',
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child:SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'WiFi FTP Server',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.settings, color: Colors.black87),
+                    onPressed: () {
+                      // TODO: Navigate to settings
+                    },
+                  ),
+                ),
+              ],
+            ),
+
             if (_wifiStatus == 'Permission Denied')
               PermissionBanner(onGrant: _checkPermissionAndLoad),
             const SizedBox(height: 16),
@@ -275,6 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+      )
     );
   }
 }
