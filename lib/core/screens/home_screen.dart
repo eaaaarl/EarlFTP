@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/ftp_service.dart';
+import '../../features/home/widgets/permission_banner.dart';
+import '../../features/home/widgets/network_status_card.dart';
+import '../../features/home/widgets/server_details_card.dart';
+import '../../features/home/widgets/server_actions_button.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -237,290 +241,40 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Permission Warning Banner (shown when permission denied)
             if (_wifiStatus == 'Permission Denied')
-              Card(
-                color: Colors.orange.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.warning, color: Colors.orange, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Permission Required',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Grant permission to view WiFi details',
-                              style: TextStyle(fontSize: 11),
-                            ),
-                          ],
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: _checkPermissionAndLoad,
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                        ),
-                        child: const Text('Grant'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-            if (_wifiStatus == 'Permission Denied') const SizedBox(height: 16),
-
-            // Network Status Card
-            Card(
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Network Status',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildInfoRow(
-                      Icons.wifi,
-                      'WiFi Status',
-                      _wifiStatus,
-                      _wifiStatus == 'Connected' ? Colors.green : Colors.grey,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildInfoRow(
-                      Icons.language,
-                      'IP Address',
-                      _ipAddress,
-                      Colors.blue,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildInfoRow(
-                      Icons.router,
-                      'Network',
-                      _networkName,
-                      Colors.orange,
-                    ),
-                  ],
-                ),
-              ),
+              PermissionBanner(onGrant: _checkPermissionAndLoad),
+            const SizedBox(height: 16),
+            NetworkStatusCard(
+              wifiStatus: _wifiStatus,
+              ipAddress: _ipAddress,
+              networkName: _networkName,
             ),
+            // Start/Stop Server Button
             const SizedBox(height: 24),
 
-            // Start/Stop Server Button
-            ElevatedButton(
-              onPressed: _isLoading ? null : _toggleServer,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isServerRunning ? Colors.red : Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                disabledBackgroundColor: Colors.grey,
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-                  : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(_isServerRunning ? Icons.stop : Icons.play_arrow),
-                  const SizedBox(width: 8),
-                  Text(
-                    _isServerRunning ? 'Stop Server' : 'Start Server',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+            ServerActionButton(
+              isRunning: _isServerRunning,
+              isLoading: _isLoading,
+              onPressed: _toggleServer,
             ),
 
             // Server Details (shown only when server is running)
             if (_isServerRunning) ...[
               const SizedBox(height: 24),
-              Card(
-                elevation: 4,
-                color: Colors.green.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Icon(
-                              Icons.check_circle,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Server Running',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      _buildServerDetailRow('Server URL', _serverUrl, true),
-                      const Divider(height: 24),
-                      _buildServerDetailRow('Port', _serverPort.toString(), true),
-                      const Divider(height: 24),
-                      _buildServerDetailRow('User ID', _userId, true),
-                      const Divider(height: 24),
-                      _buildServerDetailRow('Password', _password, true),
-                      const Divider(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Anonymous Access',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Switch(
-                            value: _anonymousAccess,
-                            onChanged: _isServerRunning
-                                ? null
-                                : (value) {
-                              setState(() {
-                                _anonymousAccess = value;
-                              });
-                            },
-                            activeThumbColor: Colors.green,
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 24),
-                      _buildServerDetailRow('Root Folder', _rootFolder, false),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton.icon(
-                          onPressed: _isServerRunning
-                              ? null
-                              : () {
-                            // Handle folder selection
-                          },
-                          icon: const Icon(Icons.folder_open),
-                          label: const Text('Change Folder'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              ServerDetailsCard(
+                url: _serverUrl,
+                port: _serverPort,
+                userId: _userId,
+                password: _password,
+                rootFolder: _rootFolder,
+                anonymousAccess: _anonymousAccess,
+                onCopy: _copyToClipboard,
+                onAnonymousChanged: (val) => setState(() => _anonymousAccess = val),
               ),
             ],
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildInfoRow(
-      IconData icon,
-      String label,
-      String value,
-      Color iconColor,
-      ) {
-    return Row(
-      children: [
-        Icon(icon, color: iconColor, size: 24),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildServerDetailRow(String label, String value, bool showCopy) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            if (showCopy)
-              IconButton(
-                icon: const Icon(Icons.copy, size: 18),
-                onPressed: () => _copyToClipboard(value),
-                color: Colors.blue,
-                tooltip: 'Copy',
-              ),
-          ],
-        ),
-      ],
     );
   }
 }
