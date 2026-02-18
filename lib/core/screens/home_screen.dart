@@ -32,14 +32,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _checkPermissionAndLoad() async {
-    // Check if permission is already granted
     _hasLocationPermission = await _ftpService.hasLocationPermission();
 
     if (_hasLocationPermission) {
-      // Permission already granted, just load
       _loadWifiInformation();
     } else {
-      // Show explanation dialog
       _showPermissionExplanationDialog();
     }
   }
@@ -129,7 +126,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadWifiInformation() async {
     final wifiInfo = await _ftpService.getWifiInformation();
-    print('Wifi Information: $wifiInfo');
 
     setState(() {
       _wifiStatus = wifiInfo['wifiStatus'] ?? 'Unknown';
@@ -225,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('EarlFTP'),
+        title: const Text('WiFi FTP Server'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [

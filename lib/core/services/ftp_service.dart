@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class FtpService {
@@ -7,7 +8,7 @@ class FtpService {
   // Request all necessary permissions
   Future<bool> requestAllPermissions() async {
     Map<Permission, PermissionStatus> statuses = await [
-      Permission.location,
+      Permission.locationWhenInUse,
       Permission.storage,
       Permission.manageExternalStorage,
     ].request();
@@ -29,7 +30,7 @@ class FtpService {
     final permissionStatus = await Permission.location.request();
 
     if (!permissionStatus.isGranted) {
-      print("Location permission denied");
+      debugPrint("Location permission denied");
       return {
         'wifiStatus': 'Permission Denied',
         'ipAddress': 'N/A',
@@ -42,7 +43,7 @@ class FtpService {
       final result = await _channel.invokeMethod('getWifiInformation');
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
-      print("Failed to get WiFi information: ${e.message}");
+      debugPrint("Failed to get WiFi information: ${e.message}");
       return {
         'wifiStatus': 'Disconnected',
         'ipAddress': 'N/A',
@@ -78,7 +79,7 @@ class FtpService {
       });
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
-      print("Failed to start FTP server: ${e.message}");
+      debugPrint("Failed to start FTP server: ${e.message}");
       return {
         'success': false,
         'port': 0,
@@ -93,7 +94,7 @@ class FtpService {
       final result = await _channel.invokeMethod('stopFtpServer');
       return result['success'] ?? false;
     } on PlatformException catch (e) {
-      print("Failed to stop FTP server: ${e.message}");
+      debugPrint("Failed to stop FTP server: ${e.message}");
       return false;
     }
   }
@@ -104,7 +105,7 @@ class FtpService {
       final result = await _channel.invokeMethod('getServerStatus');
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
-      print("Failed to get server status: ${e.message}");
+      debugPrint("Failed to get server status: ${e.message}");
       return {
         'isRunning': false,
         'port': 0,
